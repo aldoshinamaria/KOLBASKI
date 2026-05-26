@@ -39,3 +39,12 @@ export function scrollToOrder() {
 export function scrollToProducts() {
   document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
 }
+
+export async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch {
+    return false
+  }
+}

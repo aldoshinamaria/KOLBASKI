@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Loader2, MessageCircle, X } from 'lucide-react'
+import { Check, Copy, Loader2, MessageCircle, X } from 'lucide-react'
 import { validateQuestion, submitQuestion } from '../../lib/order'
 import { STORAGE_KEYS } from '../../lib/constants'
 import { writeStorage } from '../../lib/storage'
+import { copyToClipboard } from '../../lib/utils'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { Textarea } from '../ui/Textarea'
@@ -14,6 +15,8 @@ export function QuestionModal({ open, onClose }) {
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
   const [questionId, setQuestionId] = useState(null)
+  const [savedPhone, setSavedPhone] = useState('')
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -49,6 +52,7 @@ export function QuestionModal({ open, onClose }) {
     try {
       const result = await submitQuestion(form)
       setQuestionId(result.questionId)
+      setSavedPhone(form.phone.trim())
       writeStorage(STORAGE_KEYS.LAST_QUESTION, {
         questionId: result.questionId,
         phone: form.phone.trim(),
@@ -90,13 +94,35 @@ export function QuestionModal({ open, onClose }) {
                   Спасибо!
                 </h3>
                 {questionId && (
-                  <p className="mt-2 text-xs font-light text-cream-muted/40">
-                    № {questionId}
-                  </p>
+                  <div className="mt-4 w-full rounded-sm border border-cream/8 bg-bg-tertiary/40 p-4">
+                    <p className="text-[11px] font-light text-cream-muted/45">
+                      Номер вопроса
+                    </p>
+                    <p className="mt-2 font-display text-xl font-light text-cream">
+                      {questionId}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 w-full"
+                      onClick={async () => {
+                        const ok = await copyToClipboard(questionId)
+                        if (ok) {
+                          setCopied(true)
+                          setTimeout(() => setCopied(false), 2000)
+                        }
+                      }}
+                    >
+                      <Copy size={16} />
+                      {copied ? 'Скопировано' : 'Скопировать номер'}
+                    </Button>
+                  </div>
                 )}
-                <p className="mt-3 text-sm font-light leading-relaxed text-cream-muted/65">
-                  Мы получили ваш вопрос и скоро свяжемся с вами. Сохраните
-                  номер — ответ можно проверить на сайте.
+                <p className="mt-4 text-sm font-light leading-relaxed text-cream-muted/65">
+                  Ответ можно проверить на странице «Мой вопрос» — понадобятся
+                  номер и телефон{savedPhone ? ` ${savedPhone}` : ''}, даже если
+                  вы закроете сайт.
                 </p>
                 <Link to="/track" onClick={onClose} className="mt-6 w-full">
                   <Button size="lg" className="w-full" variant="outline">

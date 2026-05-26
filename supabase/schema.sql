@@ -83,7 +83,8 @@ CREATE OR REPLACE FUNCTION admin_update_order(
   p_secret TEXT,
   p_order_id TEXT,
   p_status TEXT,
-  p_admin_message TEXT DEFAULT NULL
+  p_admin_message TEXT DEFAULT NULL,
+  p_update_message BOOLEAN DEFAULT FALSE
 )
 RETURNS orders
 LANGUAGE plpgsql
@@ -100,7 +101,10 @@ BEGIN
   UPDATE orders
   SET
     status = p_status,
-    admin_message = COALESCE(p_admin_message, admin_message)
+    admin_message = CASE
+      WHEN p_update_message THEN p_admin_message
+      ELSE admin_message
+    END
   WHERE id = p_order_id
   RETURNING * INTO result;
 

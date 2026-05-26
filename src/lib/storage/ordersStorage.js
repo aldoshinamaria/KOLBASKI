@@ -1,5 +1,5 @@
 import { STORAGE_KEYS, ORDER_STATUS } from '../constants'
-import { readStorage, writeStorage, generateId } from './index'
+import { readStorage, writeStorage, generateReadableId } from './index'
 import { mapOrderFromDb, mapOrderToDb } from './mappers'
 
 function getAllRaw() {
@@ -31,7 +31,7 @@ const localOrdersStorage = {
   create(orderData) {
     const orders = getAllRaw()
     const order = {
-      id: generateId('TD'),
+      id: generateReadableId('TD'),
       createdAt: new Date().toISOString(),
       status: ORDER_STATUS.NEW,
       adminMessage: null,
@@ -99,7 +99,7 @@ async function getSupabaseOrdersStorage() {
 
     async create(orderData) {
       const order = {
-        id: generateId('TD'),
+        id: generateReadableId('TD'),
         createdAt: new Date().toISOString(),
         status: ORDER_STATUS.NEW,
         adminMessage: null,
@@ -112,12 +112,16 @@ async function getSupabaseOrdersStorage() {
     },
 
     async updateStatus(id, status, adminMessage) {
-      const { data, error } = await supabase.rpc('admin_update_order', {
+      const payload = {
         p_secret: secret,
         p_order_id: id,
         p_status: status,
-        p_admin_message: adminMessage ?? null,
-      })
+      }
+      if (adminMessage !== undefined) {
+        payload.p_admin_message = adminMessage
+        payload.p_update_message = true
+      }
+      const { data, error } = await supabase.rpc('admin_update_order', payload)
       if (error) throw error
       window.dispatchEvent(new CustomEvent('orders-updated'))
       return mapOrderFromDb(data)
@@ -137,9 +141,13 @@ async function getSupabaseOrdersStorage() {
 
 let cachedSupabaseStorage = null
 
-async function resolveStorage() {
-  const { isSupabaseConfigured } = await import('../supabase/client')
-  if (!isSupabaseConfigured) return localOrdersStorage
+async function resolveStorage(scope = 'client') {
+  const { isSupabaseConfigured, isSupabaseBackendReady } = await import(
+    '../supabase/client'
+  )
+  const useCloud =
+    scope === 'admin' ? isSupabaseBackendReady() : isSupabaseConfigured
+  if (!useCloud) return localOrdersStorage
   if (!cachedSupabaseStorage) {
     cachedSupabaseStorage = await getSupabaseOrdersStorage()
   }
@@ -148,31 +156,31 @@ async function resolveStorage() {
 
 export const ordersStorage = {
   async getAll() {
-    const storage = await resolveStorage()
+    const storage = await resolveStorage('admin')
     return storage.getAll()
   },
 
   async getById(id) {
-    const storage = await resolveStorage()
+    const storage = await resolveStorage('admin')
     return storage.getById(id)
   },
 
   async findByCredentials(orderId, phone) {
-    const storage = await resolveStorage()
+    const storage = await resolveStorage('client')
     return storage.findByCredentials(orderId, phone)
   },
 
   create(orderData) {
-    return resolveStorage().then((s) => s.create(orderData))
+    return resolveStorage('client').then((s) => s.create(orderData))
   },
 
   updateStatus(id, status, adminMessage) {
-    return resolveStorage().then((s) =>
+    return resolveStorage('admin').then((s) =>
       s.updateStatus(id, status, adminMessage),
     )
   },
 
   remove(id) {
-    return resolveStorage().then((s) => s.remove(id))
+    return resolveStorage('admin').then((s) => s.remove(id))
   },
 }

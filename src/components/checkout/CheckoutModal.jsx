@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, Loader2, X, MapPin, Store } from 'lucide-react'
+import { Check, Copy, Loader2, X, MapPin, Store } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import {
   DELIVERY_TYPES,
@@ -10,12 +10,22 @@ import {
 } from '../../lib/order'
 import { STORAGE_KEYS } from '../../lib/constants'
 import { writeStorage } from '../../lib/storage'
-import { formatPrice, cn } from '../../lib/utils'
+import { formatPrice, cn, copyToClipboard } from '../../lib/utils'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { Textarea } from '../ui/Textarea'
 
-function SuccessState({ orderId, onClose }) {
+function SuccessState({ orderId, phone, onClose }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    const ok = await copyToClipboard(orderId)
+    if (ok) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
@@ -33,16 +43,36 @@ function SuccessState({ orderId, onClose }) {
       <h3 className="font-display text-2xl font-light text-cream md:text-3xl">
         Заказ принят
       </h3>
-      <p className="mt-1 text-xs font-light text-cream-muted/40">
-        № {orderId}
-      </p>
-      <p className="mt-4 max-w-sm text-sm font-light leading-relaxed text-cream-muted/65">
-        Спасибо! Ваш заказ принят. Мы свяжемся с вами для подтверждения
-        деталей. Сохраните номер заказа — статус можно проверить на сайте.
+
+      <div className="mt-5 w-full rounded-sm border border-cream/8 bg-bg-tertiary/40 p-4">
+        <p className="text-[11px] font-light text-cream-muted/45">
+          Номер заказа — сохраните или сделайте скриншот
+        </p>
+        <p className="mt-2 font-display text-2xl font-light tracking-wide text-cream">
+          {orderId}
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-4 w-full"
+          onClick={handleCopy}
+        >
+          <Copy size={16} />
+          {copied ? 'Скопировано' : 'Скопировать номер'}
+        </Button>
+      </div>
+
+      <p className="mt-5 max-w-sm text-sm font-light leading-relaxed text-cream-muted/65">
+        Мы свяжемся с вами для подтверждения. Если закроете сайт — проверить
+        статус можно в любой момент на странице «Мой заказ»: нужны{' '}
+        <strong className="font-normal text-cream/80">номер заказа</strong> и{' '}
+        <strong className="font-normal text-cream/80">телефон</strong>
+        {phone ? ` ${phone}` : ''}.
       </p>
       <Link to="/track" onClick={onClose} className="mt-6 w-full">
         <Button size="lg" className="w-full" variant="outline">
-          Отслеживать заказ
+          Проверить статус заказа
         </Button>
       </Link>
       <Button size="lg" className="mt-3 w-full" onClick={onClose}>
@@ -205,7 +235,11 @@ export function CheckoutModal() {
 
             <div className="flex-1 overflow-y-auto">
               {status === 'success' ? (
-                <SuccessState orderId={orderId} onClose={handleSuccessClose} />
+                <SuccessState
+                  orderId={orderId}
+                  phone={form.phone.trim()}
+                  onClose={handleSuccessClose}
+                />
               ) : (
                 <form onSubmit={handleSubmit} noValidate className="p-6 md:p-8">
                   <div className="mb-6 rounded-sm border border-cream/5 bg-bg-tertiary/30 p-4">

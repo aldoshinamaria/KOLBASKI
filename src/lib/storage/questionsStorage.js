@@ -1,5 +1,5 @@
 import { STORAGE_KEYS, QUESTION_STATUS } from '../constants'
-import { readStorage, writeStorage, generateId } from './index'
+import { readStorage, writeStorage, generateReadableId } from './index'
 import { mapQuestionFromDb, mapQuestionToDb } from './mappers'
 
 function getAllRaw() {
@@ -26,7 +26,7 @@ const localQuestionsStorage = {
   create(data) {
     const questions = getAllRaw()
     const question = {
-      id: generateId('Q'),
+      id: generateReadableId('Q'),
       createdAt: new Date().toISOString(),
       status: QUESTION_STATUS.NEW,
       adminReply: null,
@@ -97,7 +97,7 @@ async function getSupabaseQuestionsStorage() {
 
     async create(data) {
       const question = {
-        id: generateId('Q'),
+        id: generateReadableId('Q'),
         createdAt: new Date().toISOString(),
         status: QUESTION_STATUS.NEW,
         adminReply: null,
@@ -143,9 +143,13 @@ async function getSupabaseQuestionsStorage() {
 
 let cachedSupabaseStorage = null
 
-async function resolveStorage() {
-  const { isSupabaseConfigured } = await import('../supabase/client')
-  if (!isSupabaseConfigured) return localQuestionsStorage
+async function resolveStorage(scope = 'client') {
+  const { isSupabaseConfigured, isSupabaseBackendReady } = await import(
+    '../supabase/client'
+  )
+  const useCloud =
+    scope === 'admin' ? isSupabaseBackendReady() : isSupabaseConfigured
+  if (!useCloud) return localQuestionsStorage
   if (!cachedSupabaseStorage) {
     cachedSupabaseStorage = await getSupabaseQuestionsStorage()
   }
@@ -154,28 +158,28 @@ async function resolveStorage() {
 
 export const questionsStorage = {
   async getAll() {
-    const storage = await resolveStorage()
+    const storage = await resolveStorage('admin')
     return storage.getAll()
   },
 
   async findByCredentials(questionId, phone) {
-    const storage = await resolveStorage()
+    const storage = await resolveStorage('client')
     return storage.findByCredentials(questionId, phone)
   },
 
   create(data) {
-    return resolveStorage().then((s) => s.create(data))
+    return resolveStorage('client').then((s) => s.create(data))
   },
 
   reply(id, adminReply) {
-    return resolveStorage().then((s) => s.reply(id, adminReply))
+    return resolveStorage('admin').then((s) => s.reply(id, adminReply))
   },
 
   markAnswered(id) {
-    return resolveStorage().then((s) => s.markAnswered(id))
+    return resolveStorage('admin').then((s) => s.markAnswered(id))
   },
 
   remove(id) {
-    return resolveStorage().then((s) => s.remove(id))
+    return resolveStorage('admin').then((s) => s.remove(id))
   },
 }

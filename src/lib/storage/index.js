@@ -35,6 +35,18 @@ export function generateId(prefix = 'id') {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
 }
 
+/** Понятный номер: TD-260526-4829 */
+export function generateReadableId(prefix) {
+  const d = new Date()
+  const datePart = [
+    String(d.getFullYear()).slice(2),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('')
+  const num = String(Math.floor(Math.random() * 10000)).padStart(4, '0')
+  return `${prefix}-${datePart}-${num}`
+}
+
 export function formatDateTime(iso) {
   return new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',

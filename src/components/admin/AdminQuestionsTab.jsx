@@ -13,15 +13,20 @@ export function AdminQuestionsTab() {
   const [replies, setReplies] = useState({})
   const [expanded, setExpanded] = useState(null)
   const [saving, setSaving] = useState(null)
+  const [error, setError] = useState('')
 
   const refresh = async () => {
     setLoading(true)
+    setError('')
     try {
       const data = await questionsStorage.getAll()
       setQuestions(data)
     } catch (err) {
       console.error(err)
       setQuestions([])
+      setError(
+        'Не удалось загрузить вопросы. Проверьте Supabase и VITE_ADMIN_SECRET.',
+      )
     } finally {
       setLoading(false)
     }
@@ -41,10 +46,19 @@ export function AdminQuestionsTab() {
       return
     }
     setSaving(id)
+    setError('')
     try {
       await questionsStorage.reply(id, text)
+      setReplies((prev) => {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
       setExpanded(null)
-      refresh()
+      await refresh()
+    } catch (err) {
+      console.error(err)
+      setError('Не удалось сохранить ответ клиенту.')
     } finally {
       setSaving(null)
     }
@@ -75,6 +89,11 @@ export function AdminQuestionsTab() {
 
   return (
     <div className="space-y-4">
+      {error && (
+        <p className="rounded-sm border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm font-light text-red-300/90">
+          {error}
+        </p>
+      )}
       {questions.map((q) => (
         <div
           key={q.id}

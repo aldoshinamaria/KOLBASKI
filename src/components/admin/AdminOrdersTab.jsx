@@ -16,15 +16,21 @@ export function AdminOrdersTab() {
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(null)
   const [adminMessages, setAdminMessages] = useState({})
+  const [saving, setSaving] = useState(null)
+  const [error, setError] = useState('')
 
   const refresh = async () => {
     setLoading(true)
+    setError('')
     try {
       const data = await ordersStorage.getAll()
       setOrders(data)
     } catch (err) {
       console.error(err)
       setOrders([])
+      setError(
+        'Не удалось загрузить заказы. Проверьте Supabase и VITE_ADMIN_SECRET.',
+      )
     } finally {
       setLoading(false)
     }
@@ -37,10 +43,50 @@ export function AdminOrdersTab() {
     return () => window.removeEventListener('orders-updated', handler)
   }, [])
 
+  const getMessageForOrder = (order) =>
+    adminMessages[order.id] !== undefined
+      ? adminMessages[order.id]
+      : order.adminMessage ?? ''
+
   const handleStatusChange = async (id, status) => {
-    const message = adminMessages[id]
-    await ordersStorage.updateStatus(id, status, message)
-    refresh()
+    const order = orders.find((o) => o.id === id)
+    if (!order) return
+    setSaving(id)
+    setError('')
+    try {
+      await ordersStorage.updateStatus(id, status, getMessageForOrder(order))
+      await refresh()
+    } catch (err) {
+      console.error(err)
+      setError('Не удалось сохранить статус заказа.')
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const handleSaveMessage = async (id) => {
+    const order = orders.find((o) => o.id === id)
+    if (!order) return
+    setSaving(id)
+    setError('')
+    try {
+      await ordersStorage.updateStatus(
+        id,
+        order.status,
+        getMessageForOrder(order),
+      )
+      setAdminMessages((prev) => {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
+      await refresh()
+    } catch (err) {
+      console.error(err)
+      setError('Не удалось сохранить комментарий для клиента.')
+    } finally {
+      setSaving(null)
+    }
   }
 
   const handleDelete = async (id) => {
@@ -69,6 +115,11 @@ export function AdminOrdersTab() {
 
   return (
     <div className="space-y-4">
+      {error && (
+        <p className="rounded-sm border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm font-light text-red-300/90">
+          {error}
+        </p>
+      )}
       {orders.map((order) => (
         <div
           key={order.id}
@@ -94,6 +145,9 @@ export function AdminOrdersTab() {
               <p className="mt-1 text-sm font-light text-cream-muted/60">
                 {formatDateTime(order.createdAt)} · {order.customer.name} ·{' '}
                 {order.customer.phone}
+              </p>
+              <p className="mt-0.5 text-xs font-light text-cream-muted/35">
+                Номер для клиента: {order.id}
               </p>
               <p className="mt-1 text-sm font-light text-crust">
                 {formatPrice(order.subtotal)}
@@ -187,7 +241,7 @@ export function AdminOrdersTab() {
               <div className="mt-6">
                 <Textarea
                   label="Комментарий для клиента (виден на странице «Мой заказ»)"
-                  value={adminMessages[order.id] ?? order.adminMessage ?? ''}
+                  value={getMessageForOrder(order)}
                   onChange={(e) =>
                     setAdminMessages((prev) => ({
                       ...prev,
@@ -201,11 +255,12 @@ export function AdminOrdersTab() {
                   variant="outline"
                   size="sm"
                   className="mt-3"
-                  onClick={() =>
-                    handleStatusChange(order.id, order.status)
-                  }
+                  disabled={saving === order.id}
+                  onClick={() => handleSaveMessage(order.id)}
                 >
-                  Сохранить комментарий
+                  {saving === order.id
+                    ? 'Сохраняем...'
+                    : 'Сохранить комментарий'}
                 </Button>
               </div>
             </div>

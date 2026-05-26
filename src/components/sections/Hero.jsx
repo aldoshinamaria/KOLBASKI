@@ -1,86 +1,21 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, Send } from 'lucide-react'
 import { Button } from '../ui/Button'
-import { TELEGRAM_URL, scrollToProducts } from '../../lib/utils'
-
-function SmokeLayer({ className, delay = 0 }) {
-  return (
-    <motion.div
-      className={`absolute rounded-full bg-gradient-to-t from-smoke/40 to-transparent blur-2xl ${className}`}
-      animate={{
-        opacity: [0.2, 0.45, 0.2],
-        y: [0, -20, 0],
-        scale: [1, 1.1, 1],
-      }}
-      transition={{ duration: 6 + delay, repeat: Infinity, ease: 'easeInOut', delay }}
-    />
-  )
-}
+import { TELEGRAM_URL, assetUrl, scrollToProducts } from '../../lib/utils'
 
 function HeroVisual() {
   return (
     <div className="relative h-full w-full overflow-hidden rounded-sm">
-      <div className="absolute inset-0 bg-gradient-to-br from-stone-900 via-bg-secondary to-bg-primary" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_40%,rgb(196_149_106/0.12),transparent_60%)]" />
-
-      {/* деревянная доска */}
-      <div className="absolute inset-x-6 bottom-16 top-24 rounded-sm bg-gradient-to-b from-wood/20 via-wood/10 to-transparent opacity-60" />
-      <div className="absolute inset-x-8 bottom-20 top-28 rounded-sm border border-cream/5 bg-bg-tertiary/30" />
-
-      {/* тёплый свет */}
-      <motion.div
-        className="absolute right-1/4 top-16 h-32 w-32 rounded-full bg-amber-soft/15 blur-3xl"
-        animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.15, 1] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      <img
+        src={assetUrl('/gallery/hero.png')}
+        alt="Колбасы, выпечка и гастрономия ручной работы — Тесто и Дым"
+        className="absolute inset-0 h-full w-full object-cover object-center"
+        loading="eager"
+        fetchPriority="high"
       />
 
-      {/* огонь */}
-      <motion.div
-        className="absolute bottom-28 left-1/3 h-16 w-10 rounded-full bg-gradient-to-t from-red-900/30 via-orange-600/20 to-transparent blur-md"
-        animate={{ opacity: [0.5, 0.8, 0.5], scaleY: [1, 1.2, 1] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-      />
-
-      {/* дым */}
-      <SmokeLayer className="bottom-32 left-1/4 h-24 w-32" delay={0} />
-      <SmokeLayer className="bottom-40 left-1/3 h-20 w-28" delay={1.5} />
-      <SmokeLayer className="bottom-36 right-1/3 h-28 w-36" delay={0.8} />
-
-      {/* колбаски */}
-      <div className="absolute bottom-32 left-12 flex rotate-[-8deg] flex-col gap-2">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-3 rounded-full bg-gradient-to-r from-crust/80 to-caramel/60 shadow-lg"
-            style={{ width: `${72 - i * 8}px`, marginLeft: `${i * 4}px` }}
-          />
-        ))}
-      </div>
-
-      {/* хлеб */}
-      <div className="absolute right-10 bottom-28">
-        <div className="relative h-20 w-24 rotate-6 rounded-full bg-gradient-to-br from-crust/70 via-amber-glow/50 to-caramel/40 shadow-xl">
-          <div className="absolute inset-2 rounded-full border border-cream/10 opacity-40" />
-          <div className="absolute top-3 left-1/2 h-px w-12 -translate-x-1/2 bg-cream/20" />
-          <div className="absolute top-5 left-1/2 h-px w-10 -translate-x-1/2 bg-cream/15" />
-        </div>
-      </div>
-
-      {/* пампушки */}
-      <div className="absolute top-1/3 right-16 flex gap-2">
-        {[0, 1].map((i) => (
-          <div
-            key={i}
-            className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-glow/60 to-cream/30 shadow-md"
-            style={{ transform: `translateY(${i * 6}px)` }}
-          />
-        ))}
-      </div>
-
-      {/* лепёшка */}
-      <div className="absolute top-1/2 left-16 h-14 w-14 rounded-full border-2 border-crust/30 bg-gradient-to-br from-caramel/30 to-transparent opacity-70" />
-
-      <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-transparent to-bg-primary/30" />
+      <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-bg-primary/40 lg:to-bg-primary/55" />
+      <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/80 via-transparent to-bg-primary/20" />
       <div className="pointer-events-none absolute inset-0 vignette" />
 
       <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">

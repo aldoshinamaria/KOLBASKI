@@ -22,6 +22,9 @@ export function AdminOrdersTab() {
     try {
       const data = await ordersStorage.getAll()
       setOrders(data)
+    } catch (err) {
+      console.error(err)
+      setOrders([])
     } finally {
       setLoading(false)
     }

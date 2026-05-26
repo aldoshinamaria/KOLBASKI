@@ -19,6 +19,9 @@ export function AdminQuestionsTab() {
     try {
       const data = await questionsStorage.getAll()
       setQuestions(data)
+    } catch (err) {
+      console.error(err)
+      setQuestions([])
     } finally {
       setLoading(false)
     }

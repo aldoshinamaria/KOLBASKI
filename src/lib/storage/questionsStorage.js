@@ -149,7 +149,7 @@ async function resolveStorage() {
   if (!cachedSupabaseStorage) {
     cachedSupabaseStorage = await getSupabaseQuestionsStorage()
   }
-  return cachedSupabaseStorage
+  return cachedSupabaseStorage ?? localQuestionsStorage
 }
 
 export const questionsStorage = {

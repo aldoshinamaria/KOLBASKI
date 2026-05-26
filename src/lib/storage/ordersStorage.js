@@ -143,7 +143,7 @@ async function resolveStorage() {
   if (!cachedSupabaseStorage) {
     cachedSupabaseStorage = await getSupabaseOrdersStorage()
   }
-  return cachedSupabaseStorage
+  return cachedSupabaseStorage ?? localOrdersStorage
 }
 
 export const ordersStorage = {

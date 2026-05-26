@@ -13,6 +13,23 @@ npm run preview
 
 - Сайт: http://localhost:5173/
 - Админ-панель: http://localhost:5173/admin
+- Продакшен: https://aldoshinamaria.github.io/KOLBASKI/
+
+## Публикация на GitHub Pages
+
+1. В репозитории: **Settings → Pages → Build and deployment**
+2. Source: **Deploy from a branch**
+3. Branch: **`gh-pages`** / **`/(root)`**
+4. Запушьте изменения в `main` — workflow соберёт проект и обновит ветку `gh-pages`
+
+Локальная проверка сборки для Pages:
+
+```bash
+npm run build
+npm run preview -- --base /KOLBASKI/
+```
+
+Откройте http://localhost:4173/KOLBASKI/
 
 ## Авторизация администратора
 

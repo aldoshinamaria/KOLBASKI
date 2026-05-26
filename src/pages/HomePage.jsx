@@ -16,6 +16,7 @@ import { HowItWorks } from '../components/sections/HowItWorks'
 import { WhyUs } from '../components/sections/WhyUs'
 import { Gallery } from '../components/sections/Gallery'
 import { Testimonials } from '../components/sections/Testimonials'
+import { TrackOrderSection } from '../components/sections/TrackOrderSection'
 import { ContactSection } from '../components/sections/ContactSection'
 import { Footer } from '../components/sections/Footer'
 
@@ -49,6 +50,7 @@ export function HomePage() {
           <WhyUs />
           <Gallery />
           <Testimonials />
+          <TrackOrderSection />
           <ContactSection />
         </main>
         <Footer />

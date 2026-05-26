@@ -69,7 +69,25 @@ VITE_ADMIN_SECRET=your-admin-secret
 
 5. Перезапустите `npm run dev`
 
+### GitHub Pages (обязательно для отслеживания с телефона)
+
+В репозитории: **Settings → Secrets and variables → Actions → New repository secret**
+
+| Secret | Значение |
+|--------|----------|
+| `VITE_SUPABASE_URL` | URL проекта Supabase |
+| `VITE_SUPABASE_ANON_KEY` | anon public key |
+| `VITE_ADMIN_SECRET` | тот же секрет, что в `schema.sql` |
+
+После добавления секретов сделайте push в `main` — workflow пересоберёт сайт с Supabase.
+
 Клиент ищет заказ/вопрос по номеру и телефону через RPC. Админка обновляет статус и ответы через защищённые RPC с `VITE_ADMIN_SECRET`.
+
+### Проверка отслеживания
+
+1. Оформите заказ на сайте — сохраните номер (например `TD-260526-4829`)
+2. В `/admin` смените статус или добавьте комментарий для клиента
+3. На главной в блоке «Уже оформили заказ?» или на `/track` введите номер + телефон
 
 ## Хранение данных
 

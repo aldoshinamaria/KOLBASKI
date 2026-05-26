@@ -15,6 +15,7 @@ const navLinks = [
   { href: '#how', label: 'Как заказать' },
   { href: '#gallery', label: 'Галерея' },
   { href: '#reviews', label: 'Отзывы' },
+  { href: '#track-order', label: 'Мой заказ' },
 ]
 
 export function Header() {

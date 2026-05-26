@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { trackStorage } from '../../lib/storage/trackStorage'
 import { Button } from '../ui/Button'
@@ -11,6 +11,13 @@ export function OrderTrackForm({ initialOrderId = '', initialPhone = '' }) {
   const [order, setOrder] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const resultRef = useRef(null)
+
+  useEffect(() => {
+    if (order && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [order])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -37,7 +44,7 @@ export function OrderTrackForm({ initialOrderId = '', initialPhone = '' }) {
         <Input
           label="Номер заказа"
           name="orderId"
-          placeholder="TD-..."
+          placeholder="TD-260526-4829"
           value={orderId}
           onChange={(e) => setOrderId(e.target.value)}
           required
@@ -51,6 +58,9 @@ export function OrderTrackForm({ initialOrderId = '', initialPhone = '' }) {
           onChange={(e) => setPhone(e.target.value)}
           required
         />
+        <p className="text-xs font-light text-cream-muted/40">
+          Укажите тот же телефон, что при оформлении заказа
+        </p>
         {error && (
           <p className="text-sm font-light text-red-400/80">{error}</p>
         )}
@@ -67,7 +77,7 @@ export function OrderTrackForm({ initialOrderId = '', initialPhone = '' }) {
       </form>
 
       {order && (
-        <div className="mt-8">
+        <div ref={resultRef} className="mt-8">
           <OrderStatusView order={order} />
         </div>
       )}

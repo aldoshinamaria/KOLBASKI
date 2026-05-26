@@ -1,4 +1,5 @@
-import { Send, MessageCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Send, MessageCircle, PackageSearch } from 'lucide-react'
 import { SectionReveal } from '../ui/SectionReveal'
 import { Button } from '../ui/Button'
 import { TELEGRAM_URL, VK_URL } from '../../lib/utils'
@@ -22,7 +23,13 @@ export function ContactSection() {
             Оформить заказ удобнее через корзину на сайте.
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap">
+            <Link to="/track">
+              <Button size="lg" data-cursor="hover">
+                <PackageSearch size={16} />
+                Проверить статус заказа
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="lg"

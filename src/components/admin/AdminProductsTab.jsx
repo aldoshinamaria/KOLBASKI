@@ -114,7 +114,7 @@ function ProductForm({ initial, onSave, onCancel }) {
         <Input
           value={form.image.startsWith('data:') ? '' : form.image}
           onChange={(e) => setForm({ ...form, image: e.target.value })}
-          placeholder="/boxes/example.png или загрузите файл"
+          placeholder="/boxes/example.jpg или загрузите файл"
         />
         <input
           type="file"

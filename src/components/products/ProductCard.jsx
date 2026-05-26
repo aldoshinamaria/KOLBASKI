@@ -27,7 +27,8 @@ export function ProductCard({ product, index }) {
         <img
           src={assetUrl(product.image)}
           alt={product.imageAlt || `Гастробокс «${product.title}»`}
-          loading="lazy"
+          loading={index < 2 ? 'eager' : 'lazy'}
+          fetchPriority={index === 0 ? 'high' : undefined}
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />

@@ -17,16 +17,16 @@ npm run preview
 
 ## Публикация на GitHub Pages
 
-1. В репозитории: **Settings → Pages → Build and deployment**
-2. Source: **Deploy from a branch**
-3. Branch: **`gh-pages`** / **`/(root)`**
-4. Запушьте изменения в `main` — workflow соберёт проект и обновит ветку `gh-pages`
+Сайт публикуется **из ветки `main`** (Settings → Pages → main / root).
 
-Локальная проверка сборки для Pages:
+При каждом push в `main` GitHub Actions собирает проект и обновляет в корне репозитория:
+`index.html`, `assets/`, `404.html`, изображения.
+
+Локально перед push можно проверить:
 
 ```bash
-npm run build
-npm run preview -- --base /KOLBASKI/
+npm run build:pages
+npm run preview
 ```
 
 Откройте http://localhost:4173/KOLBASKI/

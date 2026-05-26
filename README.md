@@ -24,23 +24,43 @@ npm run preview
 ### Клиентская часть
 - Просмотр и добавление гастробоксов в корзину
 - Оформление предзаказа (доставка / самовывоз)
+- **Отслеживание заказа** — страница `/track` (номер + телефон)
 - Кнопка «Задать вопрос» (отдельное модальное окно)
-- Telegram и ВК — для уточнений, не для заказа
+- Telegram и ВК — для срочных уточнений, не для заказа
 
 ### Админ-панель `/admin`
-- **Заказы** — просмотр, смена статуса, удаление
+- **Заказы** — просмотр, смена статуса, комментарий для клиента, удаление
 - **Гастробоксы** — добавление, редактирование, удаление
-- **Вопросы** — просмотр, отметка «Отвечен», удаление
+- **Вопросы** — просмотр, ответ клиенту, удаление
+
+## Supabase (заказы и вопросы)
+
+Без `.env` заказы и вопросы сохраняются в `localStorage` (отслеживание работает только в том же браузере).
+
+Для синхронизации между устройствами:
+
+1. Создайте проект на [supabase.com](https://supabase.com)
+2. В SQL Editor выполните скрипт `supabase/schema.sql`
+3. В `schema.sql` замените `'your-admin-secret'` на свой секрет (тот же, что в `.env`)
+4. Скопируйте `.env.example` → `.env` и заполните:
+
+```
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_ADMIN_SECRET=your-admin-secret
+```
+
+5. Перезапустите `npm run dev`
+
+Клиент ищет заказ/вопрос по номеру и телефону через RPC. Админка обновляет статус и ответы через защищённые RPC с `VITE_ADMIN_SECRET`.
 
 ## Хранение данных
 
-Данные сохраняются в `localStorage`:
-- `testo-i-dym-orders` — заказы
-- `testo-i-dym-questions` — вопросы
-- `testo-i-dym-products` — гастробоксы
-- `testo-i-dym-cart` — корзина
-
-Слой `src/lib/storage/` подготовлен для замены на backend / Firebase / Supabase.
+- **Заказы и вопросы** — Supabase (или `localStorage` без `.env`)
+- **Гастробоксы и корзина** — `localStorage`:
+  - `testo-i-dym-products` — гастробоксы
+  - `testo-i-dym-cart` — корзина
+  - `testo-i-dym-last-order` / `testo-i-dym-last-question` — последние номера для `/track`
 
 ## Структура
 
@@ -51,14 +71,16 @@ src/
 │   ├── cart/           # Корзина
 │   ├── checkout/       # Оформление заказа
 │   ├── question/       # Окно вопроса
-│   ├── products/       # Карточка бокса
+│   ├── track/            # Отслеживание заказа и вопроса
+│   ├── products/         # Карточка бокса
 │   └── sections/       # Секции сайта
 ├── context/            # CartContext, ProductsContext
 ├── data/initialProducts.js
 ├── lib/
 │   ├── constants.js
 │   ├── order/
-│   ├── payment/        # Заглушки под ЮKassa, Т-Банк, СБП
+│   ├── supabase/         # Клиент Supabase
+│   ├── payment/          # Заглушки под ЮKassa, Т-Банк, СБП
 │   └── storage/
-└── pages/              # HomePage, AdminPage
+└── pages/              # HomePage, AdminPage, TrackPage
 ```

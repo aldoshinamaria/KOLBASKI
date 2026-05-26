@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Loader2, MessageCircle, X } from 'lucide-react'
 import { validateQuestion, submitQuestion } from '../../lib/order'
+import { STORAGE_KEYS } from '../../lib/constants'
+import { writeStorage } from '../../lib/storage'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { Textarea } from '../ui/Textarea'
@@ -10,6 +13,7 @@ export function QuestionModal({ open, onClose }) {
   const [form, setForm] = useState({ name: '', phone: '', text: '' })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
+  const [questionId, setQuestionId] = useState(null)
 
   useEffect(() => {
     if (open) {
@@ -19,6 +23,7 @@ export function QuestionModal({ open, onClose }) {
       if (status === 'success') {
         setForm({ name: '', phone: '', text: '' })
         setStatus('idle')
+        setQuestionId(null)
         setErrors({})
       }
     }
@@ -42,7 +47,12 @@ export function QuestionModal({ open, onClose }) {
     }
     setStatus('loading')
     try {
-      await submitQuestion(form)
+      const result = await submitQuestion(form)
+      setQuestionId(result.questionId)
+      writeStorage(STORAGE_KEYS.LAST_QUESTION, {
+        questionId: result.questionId,
+        phone: form.phone.trim(),
+      })
       setStatus('success')
     } catch {
       setStatus('idle')
@@ -79,10 +89,21 @@ export function QuestionModal({ open, onClose }) {
                 <h3 className="font-display text-xl font-light text-cream">
                   Спасибо!
                 </h3>
+                {questionId && (
+                  <p className="mt-2 text-xs font-light text-cream-muted/40">
+                    № {questionId}
+                  </p>
+                )}
                 <p className="mt-3 text-sm font-light leading-relaxed text-cream-muted/65">
-                  Мы получили ваш вопрос и скоро свяжемся с вами.
+                  Мы получили ваш вопрос и скоро свяжемся с вами. Сохраните
+                  номер — ответ можно проверить на сайте.
                 </p>
-                <Button size="lg" className="mt-8" onClick={onClose}>
+                <Link to="/track" onClick={onClose} className="mt-6 w-full">
+                  <Button size="lg" className="w-full" variant="outline">
+                    Проверить ответ
+                  </Button>
+                </Link>
+                <Button size="lg" className="mt-3 w-full" onClick={onClose}>
                   Хорошо
                 </Button>
               </div>

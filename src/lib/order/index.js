@@ -54,7 +54,7 @@ export function validateQuestion(data) {
 export async function submitOrder(order) {
   await new Promise((resolve) => setTimeout(resolve, 1200))
 
-  const saved = ordersStorage.create({
+  const saved = await ordersStorage.create({
     items: order.items,
     subtotal: order.subtotal,
     deliveryType: order.deliveryType,
@@ -70,6 +70,6 @@ export async function submitOrder(order) {
 
 export async function submitQuestion(data) {
   await new Promise((resolve) => setTimeout(resolve, 800))
-  const saved = questionsStorage.create(data)
+  const saved = await questionsStorage.create(data)
   return { questionId: saved.id }
 }

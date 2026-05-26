@@ -19,13 +19,19 @@ export function AdminDashboard({ onLogout }) {
   const [activeTab, setActiveTab] = useState('orders')
   const [counts, setCounts] = useState({ orders: 0, questions: 0 })
 
-  const refreshCounts = () => {
-    setCounts({
-      orders: ordersStorage.getAll().filter((o) => o.status === 'new').length,
-      questions: questionsStorage
-        .getAll()
-        .filter((q) => q.status === 'new').length,
-    })
+  const refreshCounts = async () => {
+    try {
+      const [orders, questions] = await Promise.all([
+        ordersStorage.getAll(),
+        questionsStorage.getAll(),
+      ])
+      setCounts({
+        orders: orders.filter((o) => o.status === 'new').length,
+        questions: questions.filter((q) => q.status === 'new').length,
+      })
+    } catch {
+      /* ignore */
+    }
   }
 
   useEffect(() => {

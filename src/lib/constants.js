@@ -4,6 +4,8 @@ export const STORAGE_KEYS = {
   QUESTIONS: 'testo-i-dym-questions',
   ADMIN_SESSION: 'testo-i-dym-admin-session',
   CART: 'testo-i-dym-cart',
+  LAST_ORDER: 'testo-i-dym-last-order',
+  LAST_QUESTION: 'testo-i-dym-last-question',
 }
 
 export const ADMIN_CREDENTIALS = {

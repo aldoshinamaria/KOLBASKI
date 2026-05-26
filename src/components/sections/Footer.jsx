@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Send, Phone } from 'lucide-react'
 import {
   BRAND_NAME,
@@ -94,6 +95,15 @@ export function Footer() {
                   </a>
                 </li>
               ))}
+              <li>
+                <Link
+                  to="/track"
+                  className="text-sm font-light text-cream-muted transition-colors duration-300 hover:text-cream"
+                  data-cursor="hover"
+                >
+                  Мой заказ
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

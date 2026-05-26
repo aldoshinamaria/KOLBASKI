@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Loader2, X, MapPin, Store } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
@@ -7,6 +8,8 @@ import {
   validateCheckout,
   submitOrder,
 } from '../../lib/order'
+import { STORAGE_KEYS } from '../../lib/constants'
+import { writeStorage } from '../../lib/storage'
 import { formatPrice, cn } from '../../lib/utils'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
@@ -35,9 +38,14 @@ function SuccessState({ orderId, onClose }) {
       </p>
       <p className="mt-4 max-w-sm text-sm font-light leading-relaxed text-cream-muted/65">
         Спасибо! Ваш заказ принят. Мы свяжемся с вами для подтверждения
-        деталей.
+        деталей. Сохраните номер заказа — статус можно проверить на сайте.
       </p>
-      <Button size="lg" className="mt-8" onClick={onClose}>
+      <Link to="/track" onClick={onClose} className="mt-6 w-full">
+        <Button size="lg" className="w-full" variant="outline">
+          Отслеживать заказ
+        </Button>
+      </Link>
+      <Button size="lg" className="mt-3 w-full" onClick={onClose}>
         Хорошо
       </Button>
     </motion.div>
@@ -145,6 +153,10 @@ export function CheckoutModal() {
       })
 
       setOrderId(result.orderId)
+      writeStorage(STORAGE_KEYS.LAST_ORDER, {
+        orderId: result.orderId,
+        phone: form.phone.trim(),
+      })
       setStatus('success')
     } catch {
       setStatus('idle')

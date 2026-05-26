@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { cn, scrollToProducts } from '../../lib/utils'
@@ -73,6 +74,13 @@ export function Header() {
                 {link.label}
               </a>
             ))}
+            <Link
+              to="/track"
+              className="text-sm font-light tracking-wide text-cream-muted transition-colors duration-300 hover:text-cream"
+              data-cursor="hover"
+            >
+              Мой заказ
+            </Link>
           </nav>
 
           <div className="hidden items-center gap-4 lg:flex">
@@ -114,6 +122,19 @@ export function Header() {
               {link.label}
             </motion.a>
           ))}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: navLinks.length * 0.08 }}
+          >
+            <Link
+              to="/track"
+              className="font-display text-3xl font-light text-cream"
+              onClick={() => setMobileOpen(false)}
+            >
+              Мой заказ
+            </Link>
+          </motion.div>
           <Button size="lg" onClick={handleOrder}>
             {totalItems > 0 ? 'Оформить заказ' : 'Выбрать бокс'}
           </Button>

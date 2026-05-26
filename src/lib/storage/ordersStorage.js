@@ -1,11 +1,12 @@
 import { STORAGE_KEYS, ORDER_STATUS } from '../constants'
 import { readStorage, writeStorage, generateId } from './index'
+import { mapOrderFromDb, mapOrderToDb } from './mappers'
 
 function getAllRaw() {
   return readStorage(STORAGE_KEYS.ORDERS, [])
 }
 
-export const ordersStorage = {
+const localOrdersStorage = {
   getAll() {
     return getAllRaw().sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
@@ -16,12 +17,24 @@ export const ordersStorage = {
     return getAllRaw().find((o) => o.id === id) ?? null
   },
 
+  findByCredentials(orderId, phone) {
+    const digits = phone.replace(/\D/g, '')
+    return (
+      getAllRaw().find(
+        (o) =>
+          o.id === orderId &&
+          o.customer.phone.replace(/\D/g, '') === digits,
+      ) ?? null
+    )
+  },
+
   create(orderData) {
     const orders = getAllRaw()
     const order = {
       id: generateId('TD'),
       createdAt: new Date().toISOString(),
       status: ORDER_STATUS.NEW,
+      adminMessage: null,
       ...orderData,
     }
     orders.unshift(order)
@@ -30,11 +43,15 @@ export const ordersStorage = {
     return order
   },
 
-  updateStatus(id, status) {
+  updateStatus(id, status, adminMessage) {
     const orders = getAllRaw()
     const index = orders.findIndex((o) => o.id === id)
     if (index === -1) return null
-    orders[index] = { ...orders[index], status }
+    orders[index] = {
+      ...orders[index],
+      status,
+      ...(adminMessage !== undefined ? { adminMessage } : {}),
+    }
     writeStorage(STORAGE_KEYS.ORDERS, orders)
     window.dispatchEvent(new CustomEvent('orders-updated'))
     return orders[index]
@@ -45,5 +62,117 @@ export const ordersStorage = {
     writeStorage(STORAGE_KEYS.ORDERS, orders)
     window.dispatchEvent(new CustomEvent('orders-updated'))
     return true
+  },
+}
+
+async function getSupabaseOrdersStorage() {
+  const { supabase, getAdminSecret, isSupabaseConfigured } = await import(
+    '../supabase/client'
+  )
+  if (!isSupabaseConfigured) return null
+
+  const secret = getAdminSecret()
+
+  return {
+    async getAll() {
+      const { data, error } = await supabase.rpc('admin_get_orders', {
+        p_secret: secret,
+      })
+      if (error) throw error
+      return (data || []).map(mapOrderFromDb)
+    },
+
+    async getById(id) {
+      const all = await this.getAll()
+      return all.find((o) => o.id === id) ?? null
+    },
+
+    async findByCredentials(orderId, phone) {
+      const { data, error } = await supabase.rpc('get_order_by_credentials', {
+        p_order_id: orderId,
+        p_phone: phone,
+      })
+      if (error) throw error
+      const row = Array.isArray(data) ? data[0] : data
+      return mapOrderFromDb(row)
+    },
+
+    async create(orderData) {
+      const order = {
+        id: generateId('TD'),
+        createdAt: new Date().toISOString(),
+        status: ORDER_STATUS.NEW,
+        adminMessage: null,
+        ...orderData,
+      }
+      const { error } = await supabase.from('orders').insert(mapOrderToDb(order))
+      if (error) throw error
+      window.dispatchEvent(new CustomEvent('orders-updated'))
+      return order
+    },
+
+    async updateStatus(id, status, adminMessage) {
+      const { data, error } = await supabase.rpc('admin_update_order', {
+        p_secret: secret,
+        p_order_id: id,
+        p_status: status,
+        p_admin_message: adminMessage ?? null,
+      })
+      if (error) throw error
+      window.dispatchEvent(new CustomEvent('orders-updated'))
+      return mapOrderFromDb(data)
+    },
+
+    async remove(id) {
+      const { error } = await supabase.rpc('admin_delete_order', {
+        p_secret: secret,
+        p_order_id: id,
+      })
+      if (error) throw error
+      window.dispatchEvent(new CustomEvent('orders-updated'))
+      return true
+    },
+  }
+}
+
+let cachedSupabaseStorage = null
+
+async function resolveStorage() {
+  const { isSupabaseConfigured } = await import('../supabase/client')
+  if (!isSupabaseConfigured) return localOrdersStorage
+  if (!cachedSupabaseStorage) {
+    cachedSupabaseStorage = await getSupabaseOrdersStorage()
+  }
+  return cachedSupabaseStorage
+}
+
+export const ordersStorage = {
+  async getAll() {
+    const storage = await resolveStorage()
+    return storage.getAll()
+  },
+
+  async getById(id) {
+    const storage = await resolveStorage()
+    return storage.getById(id)
+  },
+
+  async findByCredentials(orderId, phone) {
+    const storage = await resolveStorage()
+    return storage.findByCredentials(orderId, phone)
+  },
+
+  create(orderData) {
+    return resolveStorage().then((s) => s.create(orderData))
+  },
+
+  updateStatus(id, status, adminMessage) {
+    return resolveStorage().then((s) =>
+      s.updateStatus(id, status, adminMessage),
+    )
+  },
+
+  remove(id) {
+    return resolveStorage().then((s) => s.remove(id))
   },
 }

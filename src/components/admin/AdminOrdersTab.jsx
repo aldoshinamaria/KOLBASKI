@@ -9,12 +9,23 @@ import {
 import { formatDateTime } from '../../lib/storage'
 import { formatPrice, cn } from '../../lib/utils'
 import { Button } from '../ui/Button'
+import { Textarea } from '../ui/Textarea'
 
 export function AdminOrdersTab() {
   const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(null)
+  const [adminMessages, setAdminMessages] = useState({})
 
-  const refresh = () => setOrders(ordersStorage.getAll())
+  const refresh = async () => {
+    setLoading(true)
+    try {
+      const data = await ordersStorage.getAll()
+      setOrders(data)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     refresh()
@@ -23,17 +34,26 @@ export function AdminOrdersTab() {
     return () => window.removeEventListener('orders-updated', handler)
   }, [])
 
-  const handleStatusChange = (id, status) => {
-    ordersStorage.updateStatus(id, status)
+  const handleStatusChange = async (id, status) => {
+    const message = adminMessages[id]
+    await ordersStorage.updateStatus(id, status, message)
     refresh()
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Удалить этот заказ?')) {
-      ordersStorage.remove(id)
+      await ordersStorage.remove(id)
       if (expanded === id) setExpanded(null)
       refresh()
     }
+  }
+
+  if (loading) {
+    return (
+      <p className="py-12 text-center text-sm font-light text-cream-muted/50">
+        Загрузка заказов...
+      </p>
+    )
   }
 
   if (orders.length === 0) {
@@ -126,12 +146,13 @@ export function AdminOrdersTab() {
                     {DELIVERY_TYPE_LABELS[order.deliveryType]}
                   </p>
                 </div>
-                {order.deliveryType === 'delivery' && order.customer.address && (
-                  <div>
-                    <p className="text-cream-muted/45">Адрес доставки</p>
-                    <p className="mt-1 text-cream">{order.customer.address}</p>
-                  </div>
-                )}
+                {order.deliveryType === 'delivery' &&
+                  order.customer.address && (
+                    <div>
+                      <p className="text-cream-muted/45">Адрес доставки</p>
+                      <p className="mt-1 text-cream">{order.customer.address}</p>
+                    </div>
+                  )}
               </div>
 
               <div className="mt-4">
@@ -153,12 +174,37 @@ export function AdminOrdersTab() {
 
               {order.customer.comment && (
                 <div className="mt-4">
-                  <p className="text-cream-muted/45">Комментарий</p>
+                  <p className="text-cream-muted/45">Комментарий клиента</p>
                   <p className="mt-1 text-cream-muted/75">
                     {order.customer.comment}
                   </p>
                 </div>
               )}
+
+              <div className="mt-6">
+                <Textarea
+                  label="Комментарий для клиента (виден на странице «Мой заказ»)"
+                  value={adminMessages[order.id] ?? order.adminMessage ?? ''}
+                  onChange={(e) =>
+                    setAdminMessages((prev) => ({
+                      ...prev,
+                      [order.id]: e.target.value,
+                    }))
+                  }
+                  rows={3}
+                  placeholder="Например: заказ подтверждён, доставим завтра с 18:00 до 20:00"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() =>
+                    handleStatusChange(order.id, order.status)
+                  }
+                >
+                  Сохранить комментарий
+                </Button>
+              </div>
             </div>
           )}
         </div>

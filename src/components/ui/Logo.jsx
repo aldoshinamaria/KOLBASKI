@@ -1,4 +1,4 @@
-import { cn } from '../../lib/utils'
+import { cn, assetUrl } from '../../lib/utils'
 
 export const LOGO_SRC = '/logo.png'
 export const LOGO_ALT = 'Тесто и Дым — домашняя гастрономия ручной работы'
@@ -20,7 +20,7 @@ export function Logo({ size = 'sm', className, imgClassName }) {
       )}
     >
       <img
-        src={LOGO_SRC}
+        src={assetUrl(LOGO_SRC)}
         alt={LOGO_ALT}
         className={cn('h-full w-full object-cover', imgClassName)}
         loading="eager"

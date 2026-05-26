@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
-import { formatPrice } from '../../lib/utils'
+import { formatPrice, assetUrl } from '../../lib/utils'
 
 export function CartItem({ item }) {
   const { updateQuantity, removeItem } = useCart()
@@ -16,7 +16,7 @@ export function CartItem({ item }) {
     >
       <div className="h-20 w-20 shrink-0 overflow-hidden rounded-sm">
         <img
-          src={item.image}
+          src={assetUrl(item.image)}
           alt={item.title}
           className="h-full w-full object-cover"
         />

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { galleryItems } from '../../data/gallery'
 import { SectionReveal } from '../ui/SectionReveal'
-import { cn } from '../../lib/utils'
+import { cn, assetUrl } from '../../lib/utils'
 
 const aspectClasses = {
   tall: 'row-span-2',
@@ -45,7 +45,7 @@ export function Gallery() {
                 data-cursor="hover"
               >
                 <img
-                  src={item.image}
+                  src={assetUrl(item.image)}
                   alt={item.imageAlt}
                   loading="lazy"
                   decoding="async"

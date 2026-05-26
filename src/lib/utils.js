@@ -5,6 +5,21 @@ export function cn(...inputs) {
   return twMerge(clsx(inputs))
 }
 
+/** Публичные файлы из /public с учётом base (GitHub Pages: /KOLBASKI/) */
+export function assetUrl(path) {
+  if (!path) return path
+  if (
+    path.startsWith('data:') ||
+    path.startsWith('http://') ||
+    path.startsWith('https://')
+  ) {
+    return path
+  }
+  const base = import.meta.env.BASE_URL
+  const normalized = path.startsWith('/') ? path.slice(1) : path
+  return `${base}${normalized}`
+}
+
 export function formatPrice(price) {
   return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
 }

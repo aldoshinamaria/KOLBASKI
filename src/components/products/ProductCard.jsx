@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Check, ShoppingBag } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
-import { formatPrice } from '../../lib/utils'
+import { formatPrice, assetUrl } from '../../lib/utils'
 import { Button } from '../ui/Button'
 
 export function ProductCard({ product, index }) {
@@ -25,7 +25,7 @@ export function ProductCard({ product, index }) {
     >
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
-          src={product.image}
+          src={assetUrl(product.image)}
           alt={product.imageAlt || `Гастробокс «${product.title}»`}
           loading="lazy"
           decoding="async"

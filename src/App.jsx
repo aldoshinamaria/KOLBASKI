@@ -3,9 +3,11 @@ import { HomePage } from './pages/HomePage'
 import { AdminPage } from './pages/AdminPage'
 import { TrackPage } from './pages/TrackPage'
 
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, '') || undefined
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/track" element={<TrackPage />} />

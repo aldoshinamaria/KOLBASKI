@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useProducts } from '../../context/ProductsContext'
-import { formatPrice } from '../../lib/utils'
+import { formatPrice, assetUrl } from '../../lib/utils'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { Textarea } from '../ui/Textarea'
@@ -124,7 +124,7 @@ function ProductForm({ initial, onSave, onCancel }) {
         />
         {form.image && (
           <img
-            src={form.image}
+            src={assetUrl(form.image)}
             alt=""
             className="mt-2 h-24 w-32 rounded-sm object-cover"
           />
@@ -220,7 +220,7 @@ export function AdminProductsTab() {
             className="flex flex-col gap-4 rounded-sm border border-cream/8 bg-bg-secondary/40 p-5 sm:flex-row sm:items-center"
           >
             <img
-              src={product.image}
+              src={assetUrl(product.image)}
               alt=""
               className="h-20 w-28 shrink-0 rounded-sm object-cover"
             />
